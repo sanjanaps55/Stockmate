@@ -1,8 +1,9 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/
 
 # dependencies
-/node_modules
-/.pnp
+**/node_modules/
+**/dist/
+.pnp
 .pnp.js
 
 # testing
@@ -18,6 +19,13 @@
 .env.test.local
 .env.production.local
 
+# lock files
+client/package-lock.json
+server/package-lock.json
+
+# environment files
+.env
+.env.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
