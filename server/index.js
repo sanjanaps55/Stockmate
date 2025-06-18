@@ -15,13 +15,24 @@ dotenv.config();
 
 const app = express();
 
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://stockmate-topaz.vercel.app',
+  'https://*.vercel.app'   // allow any Vercel subdomain (wildcard)
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://stockmate-topaz.vercel.app'
-  ],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed for this origin: ' + origin));
+    }
+  },
   credentials: true
 }));
+
 
 app.use(express.json());
 
