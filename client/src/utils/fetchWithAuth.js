@@ -1,5 +1,5 @@
 // client/src/utils/fetchWithAuth.js
-const API_BASE = import.meta.env.VITE_BACKEND_URL;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export async function fetchWithAuth(endpoint, options = {}) {
   const token = localStorage.getItem("token");
