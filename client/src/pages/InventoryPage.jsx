@@ -80,78 +80,76 @@ export default function EnhancedInventoryPage() {
   };
 
   const handleAddItem = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.name || !formData.qty || !formData.price || !formData.category || !formData.expiry) return;
+  if (!formData.name || !formData.qty || !formData.price || !formData.category || !formData.expiry) return;
 
-    const token = localStorage.getItem("token");
-    
-    if (editingItem) {
-      handleUpdateItem(editingItem._id);
-      return;
-    }
+  if (editingItem) {
+    handleUpdateItem(editingItem._id);
+    return;
+  }
 
-    try {
-      const res = await fetchWithAuth(`/api/inventory/${shopId}`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: formData.name,
-          qty: parseInt(formData.qty),
-          price: parseFloat(formData.price),
-          total: parseFloat(formData.total),
-          category: formData.category,
-          expiry: formData.expiry
-        })
-      });
+  try {
+    const res = await fetchWithAuth(`/api/inventory/${shopId}`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: formData.name,
+      qty: parseInt(formData.qty),
+      price: parseFloat(formData.price),
+      total: parseFloat(formData.total),
+      category: formData.category,
+      expiry: formData.expiry
+    })
+  });
 
-      const newItem = await res.json();
-      setItems(prev => [...prev, newItem].sort((a, b) => a.name.localeCompare(b.name)));
-      setFormData({ name: "", qty: "", price: "", total: "", category: "", expiry: "" });
-      setShowForm(false);
-    } catch (err) {
-      console.error("Error adding item:", err);
-    }
-  };
+  setItems(prev => [...prev, res].sort((a, b) => a.name.localeCompare(b.name)));
+
+    setFormData({ name: "", qty: "", price: "", total: "", category: "", expiry: "" });
+    setShowForm(false);
+  } catch (err) {
+    console.error("Error adding item:", err);
+  }
+};
 
   const handleDeleteItem = async (itemId) => {
-    const token = localStorage.getItem("token");
-    try {
-      await fetchWithAuth(`/api/inventory/item/${itemId}`, {
-        method: "DELETE"
-      });
-      setItems(prev => prev.filter(item => item._id !== itemId));
-    } catch (err) {
-      console.error("Error deleting item:", err);
-    }
-  };
+  try {
+    await fetchWithAuth(`/api/inventory/item/${itemId}`, {
+      method: "DELETE"
+    });
+
+    setItems(prev => prev.filter(item => item._id !== itemId));
+  } catch (err) {
+    console.error("Error deleting item:", err);
+  }
+};
+
 
   const handleUpdateItem = async (itemId) => {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetchWithAuth(`/api/inventory/item/${itemId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          name: formData.name,
-          qty: parseInt(formData.qty),
-          price: parseFloat(formData.price),
-          total: parseFloat(formData.total),
-          category: formData.category,
-          expiry: formData.expiry
-        })
-      });
+  try {
+    const updatedItem = await fetchWithAuth(`/api/inventory/item/${itemId}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        name: formData.name,
+        qty: parseInt(formData.qty),
+        price: parseFloat(formData.price),
+        total: parseFloat(formData.total),
+        category: formData.category,
+        expiry: formData.expiry
+      })
+    });
+
+    setItems(prev =>
+      prev.map(item => (item._id === itemId ? updatedItem : item)).sort((a, b) => a.name.localeCompare(b.name))
+    );
+    setFormData({ name: "", qty: "", price: "", total: "", category: "", expiry: "" });
+    setShowForm(false);
+    setEditingItem(null);
+  } catch (err) {
+    console.error("Error updating item:", err);
+  }
+};
 
 
-      const updatedItem = await res.json();
-      setItems(prev =>
-        prev.map(item => (item._id === itemId ? updatedItem : item)).sort((a, b) => a.name.localeCompare(b.name))
-      );
-      setFormData({ name: "", qty: "", price: "", total: "", category: "", expiry: "" });
-      setShowForm(false);
-      setEditingItem(null);
-    } catch (err) {
-      console.error("Error updating item:", err);
-    }
-  };
 
   const handleEditClick = (item) => {
     // Format the date for the input field (YYYY-MM-DD format)
