@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { fetchWithAuth } from '../api';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const ADMIN_PASSWORD = "admin123";
 import React, { useState } from "react";

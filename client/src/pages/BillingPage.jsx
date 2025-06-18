@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import { fetchWithAuth } from "../utils/fetchWithAuth";
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 
 export default function SupermarketBilling() {
   const { shopId } = useParams();

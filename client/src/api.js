@@ -1,5 +1,5 @@
 // /client/src/api.js
-const baseURL = import.meta.env.VITE_API_URL;
+const baseURL = "https://stockmate-66d8.onrender.com"
 
 export async function fetchWithAuth(url, method = 'GET', data = null) {
   const token = localStorage.getItem('token');

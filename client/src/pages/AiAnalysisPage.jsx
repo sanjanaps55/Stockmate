@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../axios'; // adjust path as needed
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useParams } from 'react-router-dom'; // To get shopId from URL
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+
 
 export default function AiAnalysisPage() {
   const { shopId } = useParams(); // Ensure your route provides shopId
