@@ -12,7 +12,6 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
   const { shopId } = req.params;
 
   try {
-    // --- Dates: Setup today/tomorrow first (🔴 fix was needed here)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -39,11 +38,8 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    const monthlyData = monthlyDataRaw.map((d) => ({
-      name: new Date(d._id.year, d._id.month - 1).toLocaleString("default", {
-        month: "short",
-        year: "numeric"
-      }),
+    const monthlyData = (monthlyDataRaw || []).map((d) => ({
+      name: new Date(d._id.year, d._id.month - 1).toLocaleString("default", { month: "short", year: "numeric" }),
       value: d.value
     }));
 
@@ -69,7 +65,7 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
         }
       }
     ]);
-    const itemsSoldToday = itemsSoldAgg.length > 0 ? itemsSoldAgg[0].totalItems : 0;
+    const itemsSoldToday = (itemsSoldAgg[0]?.totalItems) || 0;
 
     // --- Weekly Summary ---
     const weeklyDataRaw = await Bill.aggregate([
@@ -89,14 +85,10 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
 
     const weekdayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const weeklyData = Array(7).fill(0);
-    for (let day of weeklyDataRaw) {
+    (weeklyDataRaw || []).forEach(day => {
       weeklyData[day._id - 1] = day.value;
-    }
-
-    const weeklyFormatted = weeklyData.map((val, i) => ({
-      name: weekdayMap[i],
-      value: val
-    }));
+    });
+    const weeklyFormatted = weeklyData.map((val, i) => ({ name: weekdayMap[i], value: val }));
 
     // --- Daily Summary ---
     const dailyDataRaw = await Bill.aggregate([
@@ -116,14 +108,10 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
     ]);
 
     const dailyData = Array(24).fill(0);
-    for (let hour of dailyDataRaw) {
+    (dailyDataRaw || []).forEach(hour => {
       dailyData[hour._id] = hour.value;
-    }
-
-    const dailyFormatted = dailyData.map((val, i) => ({
-      name: `${i}:00`,
-      value: val
-    }));
+    });
+    const dailyFormatted = dailyData.map((val, i) => ({ name: `${i}:00`, value: val }));
 
     // --- Low Stock Items ---
     const lowStockItems = await InventoryItem.find({
@@ -131,7 +119,7 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
       $expr: { $lt: ["$qty", "$threshold"] }
     }).select("name qty threshold");
 
-    // --- Category Performance (Top 3 This Week) ---
+    // --- Category Performance ---
     const categoryAgg = await Bill.aggregate([
       {
         $match: {
@@ -151,23 +139,16 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
       { $limit: 3 }
     ]);
 
+    const totalQtySum = categoryAgg.reduce((acc, cur) => acc + cur.totalQty, 0);
     const categoryData = categoryAgg.map((cat) => ({
       name: cat._id || "Uncategorized",
       value: (cat.totalSales / 1000).toFixed(1),
-      percentage:
-        ((cat.totalQty /
-          categoryAgg.reduce((acc, cur) => acc + cur.totalQty, 0)) *
-          100).toFixed(0) + "%"
+      percentage: totalQtySum ? `${Math.round((cat.totalQty / totalQtySum) * 100)}%` : "0%"
     }));
 
     // --- Avg Basket Value ---
-    const avgBasketValue =
-      transactionsToday > 0
-        ? (
-            dailyFormatted.reduce((sum, d) => sum + d.value, 0) /
-            transactionsToday
-          ).toFixed(2)
-        : "0.00";
+    const todayTotal = dailyFormatted.reduce((sum, d) => sum + d.value, 0);
+    const avgBasketValue = transactionsToday > 0 ? (todayTotal / transactionsToday).toFixed(2) : "0.00";
 
     // --- Final Response ---
     res.json({
@@ -181,7 +162,6 @@ router.get("/:shopId", authMiddleware, async (req, res) => {
       avgBasketValue,
       managerName: shop?.manager || "Manager"
     });
-
   } catch (err) {
     console.error("Summary error:", err);
     res.status(500).json({ error: "Failed to fetch summary data" });
