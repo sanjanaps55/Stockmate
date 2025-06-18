@@ -98,33 +98,30 @@ export default function DashboardPage() {
   };
 
   const handleDeleteConfirm = async () => {
-    const token = localStorage.getItem("token");
-    const shopId = shops[deleteModal.shopIndex]._id;
+  const shopId = shops[deleteModal.shopIndex]._id;
 
-    try {
-      const shopId = shops[deleteModal.shopIndex]._id;
-      await fetchWithAuth(`/api/shops/${shopId}`, {
-        method: "DELETE",
-        body: JSON.stringify({ password: deleteModal.password }),
-      });
+  try {
+    const result = await fetchWithAuth(`/api/shops/${shopId}`, {
+      method: "DELETE",
+      body: JSON.stringify({ password: deleteModal.password }),
+    });
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message || "Failed to delete");
-      }
-
-      const updatedShops = shops.filter((_, index) => index !== deleteModal.shopIndex);
-      setShops(updatedShops);
-      handleDeleteCancel();
-    } catch (err) {
-      console.error(err);
-      setDeleteModal(prev => ({
-        ...prev,
-        error: err.message
-      }));
+    if (result.error) {
+      throw new Error(result.error || "Failed to delete");
     }
-  };
+
+    const updatedShops = shops.filter((_, index) => index !== deleteModal.shopIndex);
+    setShops(updatedShops);
+    handleDeleteCancel();
+  } catch (err) {
+    console.error(err);
+    setDeleteModal(prev => ({
+      ...prev,
+      error: err.message
+    }));
+  }
+};
+
 
   const handleDeleteCancel = () => {
     setDeleteModal({
