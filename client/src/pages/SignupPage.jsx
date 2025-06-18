@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import api from '../axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: "https://stockmate-66d8.onrender.com"
+});
+
 
 export default function SignupPage() {
   const [password, setPassword] = useState('');
