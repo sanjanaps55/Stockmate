@@ -101,14 +101,13 @@ export default function ShopPage() {
 
 const handleSubmitDelivery = async (e) => {
   e.preventDefault();
-  const token = localStorage.getItem("token");
 
   try {
-    await fetchWithAuth(`/api/deliveries/${shopId}`, 'POST', { ...newDelivery, shopId });
+    const added = await fetchWithAuth(`/api/deliveries/${shopId}`, {
+      method: 'POST',
+      body: JSON.stringify({ ...newDelivery, shopId })
+    });
 
-    if (!res.ok) throw new Error("Failed to add delivery");
-
-    const added = await res.json();
     setUpcomingDeliveries((prev) => [...prev, added]);
     setShowDeliveryForm(false);
     setNewDelivery({
@@ -122,6 +121,7 @@ const handleSubmitDelivery = async (e) => {
     console.error("Error submitting delivery:", err);
   }
 };
+
 
 const handleDeleteClick = (index) => {
   setDeleteIndex(index);
