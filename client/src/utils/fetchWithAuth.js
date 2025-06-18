@@ -1,5 +1,4 @@
-// client/src/utils/fetchWithAuth.js
-const API_BASE = "https://stockmate-66d8.onrender.com";
+const API_BASE = "https://stockmate-66d8.onrender.com";  // HARD-CODE IT NOW
 
 export async function fetchWithAuth(endpoint, options = {}) {
   const token = localStorage.getItem("token");
