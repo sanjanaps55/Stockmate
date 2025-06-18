@@ -11,21 +11,20 @@ import summaryRoutes from "./routes/summary.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import cors from "cors";
 
-// ✅ Load environment variables
 dotenv.config();
 
-
-// ✅ Initialize Express app
 const app = express();
 
-// ✅ Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'https://stockmate-topaz.vercel.app'
+  ],
   credentials: true
 }));
+
 app.use(express.json());
 
-// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/inventory", inventoryRoutes);
@@ -35,8 +34,6 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/summary", summaryRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 
-
-// ✅ Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     app.listen(5000, () => {
