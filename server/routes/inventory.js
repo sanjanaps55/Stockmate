@@ -37,7 +37,7 @@ router.post("/:shopId", async (req, res) => {
 router.delete("/item/:itemId", async (req, res) => {
   try {
     await InventoryItem.findByIdAndDelete(req.params.itemId);
-    res.sendStatus(204);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete item" });
   }
